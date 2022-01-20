@@ -78,6 +78,18 @@ module DcidevApproval
       end
     end
 
+    def pending_insert?
+      self.change_status.nil? && %w[waiting rejected].include?(self.status)
+    end
+
+    def pending_update?
+      self.change_status == "pending_update"
+    end
+
+    def pending_delete?
+      self.change_status == "pending_delete"
+    end
+
     def delete_changes(params, agent, request, menu)
       # return unless %w[pending_update pending_delete].include? self.change_status
       raise self.errors.full_messages.join(", ") unless self.update(data_changes: nil, change_status: nil, status: self.status == "waiting" ? :rejected : :approved)

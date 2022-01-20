@@ -8,4 +8,6 @@ Gem::Specification.new do |s|
     s.email = ["punto@privyid.tech"]
     s.files = Dir["{bin,lib}/**/*", "README.md"]
     s.require_paths = ["lib"]
+
+    s.add_dependency 'dcidev_active_record'
   end

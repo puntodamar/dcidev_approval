@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name = "dcidev_approval"
-    s.version = "0.0.1"
+    s.version = "0.0.2"
     # s.date = ""
     s.summary = "Logic for implementing record changes approval"
     s.description = "Testing phase"

@@ -44,7 +44,7 @@ module DcidevApproval
         log = self.activity_logs.where("activity LIKE '%edit%'").limit(1).order(created_at: :desc).try(:first)
       end
       {
-        modified_by: log.present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s}[#{log.try(:agent).try(:roles).try(:first).try(:name)}])" : nil,
+        modified_by: log.present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s}[#{log.try(:agent).try(:roles).try(:first).try(:name)}])" : "System",
         modified_at: log.present? ? log.try(:created_at) || self.try(:updated_at) || self.try(:created_at) : nil
       }
     end
@@ -66,7 +66,7 @@ module DcidevApproval
       }
     end
 
-    def approve_changes(params, agent, request)
+    def approve_changes
 
       if self.change_status.nil? && %w[waiting rejected].include?(self.status)
         raise self.errors.full_messages.join(", ") unless self.update(status: :approved, data_changes: nil, change_status: nil)
@@ -89,13 +89,13 @@ module DcidevApproval
       end
     end
 
-    def delete_changes(params, agent, request)
+    def delete_changes
       # return unless %w[pending_update pending_delete].include? self.change_status
       raise self.errors.full_messages.join(", ") unless self.update(data_changes: nil, change_status: nil, status: self.status == "waiting" ? :rejected : :approved)
       # ActivityLog.write("Reject changes to #{self.class.to_s}", request, agent, menu, self) if params.log
     end
 
-    def edit_data(params, agent, request, bypass = true, &block)
+    def edit_data(params, agent, bypass = true)
       raise "data still waiting for approval" if self.waiting_approval?
       if bypass
         raise self.errors.full_messages.join(", ") unless self.update_by_params(params, false)
@@ -112,16 +112,16 @@ module DcidevApproval
       yield true
     end
 
-    def approval(params, agent, request)
+    def approval(params)
       if params.status == "approved"
-        self.approve_changes(params, agent, request)
+        self.approve_changes
       elsif params.status == "rejected"
-        self.delete_changes(params, agent, request)
+        self.delete_changes
       end
       yield true
     end
 
-    def delete_data(params, agent, request, bypass = true)
+    def delete_data(agent, bypass = true)
       raise "data still waiting for approval" if self.waiting_approval?
       if bypass || agent.is_admin?
         ActiveRecord::Base.transaction do
@@ -137,7 +137,7 @@ module DcidevApproval
   end
 
   module ClassMethods
-    def create_data(params, agent, request, bypass = true)
+    def create_data(params, agent, bypass = true)
       if bypass
         ActiveRecord::Base.transaction do
           data = params.merge!({ status: :approved })

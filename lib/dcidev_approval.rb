@@ -44,7 +44,7 @@ module DcidevApproval
         log = self.activity_logs.where("activity LIKE '%edit%'").limit(1).order(created_at: :desc).try(:first)
       end
       {
-        modified_by: log.present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s}[#{log.try(:agent).try(:roles).try(:first).try(:name)}])" : "System",
+        modified_by: log.present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s} | #{log.try(:agent).try(:roles).try(:first).try(:name)})" : "System",
         modified_at: log.present? ? log.try(:created_at) || self.try(:updated_at) || self.try(:created_at) : nil
       }
     end
@@ -52,7 +52,7 @@ module DcidevApproval
     def created_by
       log = self.activity_logs.try(:first)
       {
-        created_by: log.present? && log.try(:agent).try(:name).present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s}[#{log.try(:agent).try(:roles).try(:first).try(:name)}])" : "System",
+        created_by: log.present? && log.try(:agent).try(:name).present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s} | #{log.try(:agent).try(:roles).try(:first).try(:name)})" : "System",
         created_at: self.try(:created_at) || log.try(:created_at)
       }
     end
@@ -61,7 +61,7 @@ module DcidevApproval
       last_approve = self.activity_logs.where("activity LIKE '%approv%'").limit(1).order(created_at: :desc).try(:first)
       last_entry = self.activity_logs.last
       {
-        approved_by: last_approve.try(:id) == last_entry.try(:id) ? last_approve.try(:agent).try(:name) : nil,
+        approved_by: last_approve.try(:id) == last_entry.try(:id) ? last_approve.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s} | #{log.try(:agent).try(:roles).try(:first).try(:name)})"  : nil,
         approved_at: last_approve.try(:id) == last_entry.try(:id) ? last_approve.try(:created_at) : nil
       }
     end

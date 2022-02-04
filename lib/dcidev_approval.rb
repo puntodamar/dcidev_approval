@@ -121,7 +121,7 @@ module DcidevApproval
           # ActivityLog.write("#{agent.is_admin? ? nil : "Request "}Edit #{self.class.to_s}", request, agent, menu, self) if params.log
         end
       end
-      yield true
+      yield self
     end
 
     def approval(params)
@@ -130,7 +130,7 @@ module DcidevApproval
       elsif params.status == "rejected"
         self.delete_changes
       end
-      yield true
+      yield self
     end
 
     def delete_data(agent, bypass = true)
@@ -155,15 +155,15 @@ module DcidevApproval
           data = params.merge!({ status: :approved })
           d = self.new_from_params(data)
           raise d.errors.full_messages.join(", ") unless d.save
+          yield d
           # ActivityLog.write("#{agent.is_admin? ? nil : "Request "} Add #{self.to_s}", request, agent, menu, d) if params.log
         end
       else
         d = self.new_from_params(params)
         d.status = agent.is_admin? ? :approved : :waiting
         raise d.errors.full_messages.join(", ") unless d.save
-        # ActivityLog.write("Add #{self.to_s}", request, agent, menu, d) if params.log
+        yield d
       end
-      yield d
     end
   end
 end

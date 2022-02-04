@@ -36,6 +36,18 @@ module DcidevApproval
       self.change_status == "pending_delete"
     end
 
+    def approved?
+      self.status == "approved"
+    end
+
+    def rejected?
+        self.status == "rejected"
+    end
+
+    def waiting?
+        self.status == "waiting"
+    end
+
     def last_modified_by
       # p self.audit_trail
       if self.try(:change_status).present? && self.try(:change_status) == 'pending_delete'
@@ -61,7 +73,7 @@ module DcidevApproval
       last_approve = self.activity_logs.where("activity LIKE '%approv%'").limit(1).order(created_at: :desc).try(:first)
       last_entry = self.activity_logs.last
       {
-        approved_by: last_approve.try(:id) == last_entry.try(:id) ? last_approve.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s} | #{log.try(:agent).try(:roles).try(:first).try(:name)})"  : nil,
+        approved_by: last_approve.try(:id) == last_entry.try(:id) ? last_approve.try(:agent).try(:name).to_s + " (#{last_approve.try(:agent).try(:username).to_s} | #{last_approve.try(:agent).try(:roles).try(:first).try(:name)})"  : nil,
         approved_at: last_approve.try(:id) == last_entry.try(:id) ? last_approve.try(:created_at) : nil
       }
     end

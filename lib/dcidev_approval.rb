@@ -37,7 +37,7 @@ module DcidevApproval
     end
 
     def approved?
-      self.status == "approved"
+      self.status == "approved" || self.change_status.present?
     end
 
     def rejected?

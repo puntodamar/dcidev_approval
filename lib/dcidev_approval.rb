@@ -37,7 +37,7 @@ module DcidevApproval
     end
 
     def approved?
-      self.status == "approved" || self.change_status.present?
+      self.status == "approved" || self.change_status.nil?
     end
 
     def rejected?
@@ -56,7 +56,7 @@ module DcidevApproval
         log = self.activity_logs.where("activity LIKE '%edit%'").limit(1).order(created_at: :desc).try(:first)
       end
       {
-        modified_by: log.present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s} | #{log.try(:agent).try(:roles).try(:first).try(:name)})" : "System",
+        modified_by: log.present? ? log.try(:agent).try(:name).to_s + " (#{log.try(:agent).try(:username).to_s} | #{log.try(:agent).try(:roles).try(:first).try(:name)})" : nil,
         modified_at: log.present? ? log.try(:created_at) || self.try(:updated_at) || self.try(:created_at) : nil
       }
     end

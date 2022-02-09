@@ -93,11 +93,7 @@ module DcidevApproval
         # self.delay(queue: "reorder_#{self.id}", priority: 0).reorder if self.class.column_names.include?("view_order")
 
       elsif self.change_status == "pending_delete"
-        raise self.errors.full_messages.join(", ") unless self.update(change_status: nil, data_changes: nil)
-        ActiveRecord::Base.transaction do
-          # ActivityLog.write("Approve delete to #{self.class.to_s}", request, agent, menu, self) if params.log
-          self.try(:destroy)
-        end
+        self.destroy
       end
     end
 

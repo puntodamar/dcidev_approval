@@ -59,6 +59,24 @@ Explanation
 
 To track changes peformed to a record, call `instance_model.audit_trails`
 
+# How to Update
+You have to assign `@before_values` to save the `before` change values. If you forgot to do it, the program will still work but the `before` value will be empty.
+```ruby
+desc 'Edit Produk'
+
+params do
+    requires :name, type: String
+end
+put '/:id' do
+    # DONT FORGET 
+    @before_values = @produk.before_values(declared(params))
+    # DONT FORGET 
+    # 
+    @produk.edit_data(declared(params), current_user)
+    present true
+end
+```
+
 # Approval
 To approve / reject changes, call `approval(params)`.
 You MUST use `status` as the param name otherwise it wont work.

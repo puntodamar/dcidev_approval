@@ -41,6 +41,33 @@ class ApplicationRecord < ActiveRecord::Base
 end
 ```
 
+#### 5. On your resource file, set @activity_model your model instance
+```ruby
+# for edit & delete
+before do
+    unless params.id.nil?
+        @produk = Produk.find_by_id(params.id)
+        error!("Invalid produk", 422) unless @produk.present?
+        @activity_model = @produk
+    end
+end
+```
+
+```ruby
+# for create
+desc 'Add Produk'
+params do
+    requires :name, type: String
+end
+post '/' do
+    @produk = ::Produk.new_from_params(params)
+    error!(@produk.errors.full_messages.join(', '), 422) unless @produk.save
+    @activity_model = @produk
+    present :produk, @produk
+end
+```
+
+
 # Features
 * Create: `Model.create_data(declared(params), current_user, bypass)`
 * Update: `model.edit_data(declared(params), current_user, bypass)`

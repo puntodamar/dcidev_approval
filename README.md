@@ -4,8 +4,11 @@
 ```ruby
 class AddStatusToProduk < ActiveRecord::Migration[6.0]
     def change 
-        add_column :produk, :status, :string
-        add_column :produk, :change_status, :string
+        change_column :model do |t|
+            t.string :status
+            t.string :change_status
+            t.json :data_changes
+        end
     end
 end
 ```
@@ -17,8 +20,6 @@ enum status: STATUS.zip(STATUS).to_h, _prefix: true
 CHANGE_STATUS = %w(pending_delete pending_update).freeze
 enum change_status: CHANGE_STATUS.zip(CHANGE_STATUS).to_h, _prefix: true
 ```
-
-
 
 ##### 2. Format your `Agent` and `Role` with one-many relationship.
 ##### 3.  Declare instance method `is_admin?` to `Agent` to find out whether an agent is an admin or not
@@ -56,8 +57,23 @@ Explanation
 * `current_user`: the agent responsible for the changes
 * `bypass`: boolean value to toogle the approval system. If not sent, the default value is `true`
 
-To track changes peformed to a record, call 
+To track changes peformed to a record, call `instance_model.audit_trails`
+
+# Approval
+To approve / reject changes, call `approval(params)`.
+You MUST use `status` as the param name otherwise it wont work.
+```ruby
+        params do
+            requires :status, type: String, values: %w[approved rejected]
+        end
+        post "/approval/:id" do
+            @produk.approval(params, current_user)
+            present :produk, @produk
+        end
+```
+
 # Callbacks
+
 To execute code before/after the CRUD, include module `DcidevApproval` in `ApplicationRecord` and peform overide and or overload on it's child model.
 
 `app/models/application_record.rb`

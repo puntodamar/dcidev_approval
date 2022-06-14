@@ -89,18 +89,19 @@ end
 ```ruby
 class ChildModel < ApplicationRecord
     # ...
-    def self.create_data(params, agent, request)
+    def self.create_data(params, agent)
         super(params, agent, false) do |data|
             # do something after the record is successfully created
             # in this case, write an activity log
             # the data variable will return the created record
-            ActivityLog.write("#{agent.is_admin? || params.bypass ? nil : "Request "} Add #{self.class.to_s}", request, agent, menu, data) if params.log
+            ActivityLog.write('Request to create new role', agent: agent)
         end
     end
     
-    def edit_data(params, agent, request)
+    def edit_data(params, agent)
         super(params, agent, false) do |_|
             # do something after the record is successfully edited and require approval
+            ActivityLog.write('Request changes for role', agent: agent)
         end
     end
     # ...
